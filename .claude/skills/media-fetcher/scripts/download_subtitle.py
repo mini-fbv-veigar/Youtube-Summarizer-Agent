@@ -36,12 +36,14 @@ def download_subtitle(video_id: str, lang: str = "en,ko") -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     url = f"https://www.youtube.com/watch?v={video_id}"
-    subprocess.run(
-        ["yt-dlp", "--write-subs", "--write-auto-subs",
-         "--sub-lang", lang, "--sub-format", "srt",
-         "--skip-download", "-o", str(out_dir / video_id), url],
-        capture_output=True, text=True,
-    )
+    base_cmd = ["yt-dlp", "--sub-lang", lang, "--sub-format", "srt",
+                "--skip-download", "-o", str(out_dir / video_id), url]
+
+    # Try manual subtitles first, then auto-generated
+    for flags in [["--write-subs"], ["--write-auto-subs"]]:
+        subprocess.run(flags + base_cmd, capture_output=True, text=True)
+        if sorted(out_dir.glob("*.srt")):
+            break
 
     srt_files = sorted(out_dir.glob("*.srt"))
     if not srt_files:

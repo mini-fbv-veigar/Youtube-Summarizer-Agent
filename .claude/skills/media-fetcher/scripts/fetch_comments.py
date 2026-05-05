@@ -19,7 +19,8 @@ def fetch_comments(video_id: str, max_comments: int = 50) -> dict:
 
     url = f"https://www.youtube.com/watch?v={video_id}"
     result = subprocess.run(
-        ["yt-dlp", "--write-comments", f"--max-comments={max_comments}",
+        ["yt-dlp", "--write-comments",
+         "--extractor-args", f"youtube:max_comments={max_comments}",
          "--dump-json", "--skip-download", url],
         capture_output=True, text=True,
     )
